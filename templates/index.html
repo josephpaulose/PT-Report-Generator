@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAPT Report Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>VAPT Report Generator</h1>
+        <div class="search-box">
+            <input type="text" id="search" placeholder="Search by CVE, Name, or Description"
+                oninput="searchVulnerabilities()">
+            <button onclick="searchVulnerabilities()">Search</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Severity</th>
+                    <th>Description</th>
+                    <th>Remediation</th>
+                    <th>Reference</th>
+                </tr>
+            </thead>
+            <tbody id="vulnerabilities-table">
+                <!-- Vulnerabilities will be displayed here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function searchVulnerabilities() {
+            const searchQuery = document.getElementById('search').value;
+            let response;
+
+            if (searchQuery) {
+                response = await fetch(`/vulnerabilities?search=${searchQuery}`);
+            } else {
+                response = await fetch(`/vulnerabilities`);
+            }
+
+            const data = await response.json();
+            const vulnerabilities = data.vulnerabilities;
+            const tableBody = document.getElementById('vulnerabilities-table');
+            tableBody.innerHTML = '';
+
+            vulnerabilities.forEach(vul => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${vul.id}</td>
+                    <td>${vul.name}</td>
+                    <td>${vul.severity}</td>
+                    <td>${vul.description}</td>
+                    <td>${vul.remediation}</td>
+                    <td>${vul.reference}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Load all vulnerabilities on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            searchVulnerabilities();
+        });
+    </script>
+</body>
+
+</html>
